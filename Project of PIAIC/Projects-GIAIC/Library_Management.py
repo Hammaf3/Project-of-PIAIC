@@ -1,8 +1,16 @@
+import os
 import streamlit as st
 
+# Load library from file
 def load_library():
     library = []
-    with open("Syed Hammad.txt", "r") as file:
+    file_name = "Syed Hammad.txt"
+    
+    if not os.path.exists(file_name):
+        st.warning(f"File '{file_name}' not found. Starting with an empty library.")
+        return library
+
+    with open(file_name, "r") as file:
         for line in file:
             line = line.strip()
             if not line:  # Skip empty lines
@@ -21,7 +29,7 @@ def load_library():
                 continue
 
             # Convert the read indicator to boolean
-            read = read_str.strip() == "True"
+            read = read_str.strip().lower() == "true"
 
             library.append({
                 "title": title.strip(),
@@ -31,12 +39,15 @@ def load_library():
             })
     return library
 
-library = load_library()
-
+# Save library to file
 def save_library():
-    with open("Syed HammadAli.", "w") as file:
+    file_name = "Syed_Hammad_Library.txt"
+    with open(file_name, "w") as file:
         for book in library:
             file.write(f"{book['title']},{book['author']},{book['year']},{book['read']}\n")
+
+# Main library data
+library = load_library()
 
 st.title("📚 Personal Library Manager")
 
@@ -65,18 +76,20 @@ elif menu == "Remove Book":
     st.subheader("Remove a Book")
 
     book_titles = [book["title"] for book in library]
-    selected_book = st.selectbox("Select a book to remove", book_titles)
+    if book_titles:
+        selected_book = st.selectbox("Select a book to remove", book_titles)
 
-    if st.button("Remove Book"):
-        title = selected_book
-        for book in library:
-            if book["title"].lower() == title.lower():
-                library.remove(book)
-                save_library()
-                st.success(f"✅ '{title}' removed successfully!")
-                break
-        else:
-            st.error(f"❌ Sorry, '{title}' is not in the library.")
+        if st.button("Remove Book"):
+            for book in library:
+                if book["title"].lower() == selected_book.lower():
+                    library.remove(book)
+                    save_library()
+                    st.success(f"✅ '{selected_book}' removed successfully!")
+                    break
+            else:
+                st.error(f"❌ Sorry, '{selected_book}' is not in the library.")
+    else:
+        st.warning("No books available to remove.")
 
 elif menu == "Search Book":
     st.subheader("🔍 Search for a Book")
@@ -99,15 +112,4 @@ elif menu == "View Library":
         st.warning("No books in your library.")
     else:
         for book in library:
-            st.write(f"{book['title']} by {book['author']}")
-
-elif menu == "Statistics":
-    st.subheader("📊 Library Statistics")
-
-    total_books = len(library)
-    total_read = len([book for book in library if book["read"]])
-    percentage_read = (total_read / total_books) * 100 if total_books > 0 else 0
-
-    st.write(f"Total Books: {total_books}")
-    st.write(f"Books Read: {total_read}")
-    st.write(f"📊 Percentage Read: {percentage_read:.2f}%")
+            st.write
